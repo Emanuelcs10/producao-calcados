@@ -38,31 +38,33 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
-      const { codigo, padrao1, qtd_matrizes, dados_matrizaria } = req.body;
+  const { codigo, padrao1, matrizes_opcao, matrizaria } = req.body;
 
-      if (!codigo) return res.status(400).json({ error: "Campo 'codigo' obrigatório" });
+  const { data: programa, error } = await supabase
+    .from("programas")
+    .insert([{ codigo, padrao1, matrizes_opcao }])
+    .select()
+    .single();
 
-      const { error: errUpsert } = await supabase
-        .from("programas")
-        .upsert({ codigo, padrao1, qtd_matrizes });
+  if (error) return res.status(500).json({ error: error.message });
 
-      if (errUpsert) return res.status(500).json({ error: errUpsert.message });
-
-      await supabase.from("matrizaria").delete().eq("programa_codigo", codigo);
-
-      if (Array.isArray(dados_matrizaria) && dados_matrizaria.length > 0) {
-        const rows = dados_matrizaria.map(it => ({
-          programa_codigo: codigo,
-          numeracao: it.numeracao,
-          matrizes: it.matrizes,
-          giros_inicial: it.girosInicial
-        }));
-        const { error: errInsert } = await supabase.from("matrizaria").insert(rows);
-        if (errInsert) return res.status(500).json({ error: errInsert.message });
-      }
-
-      return res.status(200).json({ message: "Programa salvo com sucesso!" });
+  // só insere matrizaria se veio algo
+  if (matrizaria && Array.isArray(matrizaria)) {
+    for (let m of matrizaria) {
+      await supabase.from("matrizaria").insert([
+        {
+          programa_id: programa.id,
+          numeracao: m.numeracao,
+          matrizes: m.matrizes,
+          saldo_inicial: m.saldo_inicial
+        }
+      ]);
     }
+  }
+
+  return res.status(200).json(programa);
+}
+
 
     if (req.method === "DELETE") {
       const { senha } = req.body || {};
