@@ -24,13 +24,18 @@
         matrizes_opcao: parseInt(document.getElementById('matrizes_opcao').value),
         matrizaria: []
       };
-      const res = await fetch('/api/programa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(programa)
-      });
-      const data = await res.json();
-      document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+
+      try {
+        const res = await fetch('/api/programa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(programa)
+        });
+        const data = await res.json();
+        document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('output').innerText = 'Erro: ' + err;
+      }
     });
   </script>
 </body>
