@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Programa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+  <h1 class="text-2xl font-bold mb-4">Cadastro de Programa</h1>
+  <form id="formCadastro" class="space-y-4">
+    <input type="text" id="codigo" placeholder="Código do Programa" class="border p-2 w-full" required>
+    <input type="number" id="padrao1" placeholder="Padrão 1" class="border p-2 w-full" required>
+    <input type="number" id="matrizes_opcao" placeholder="Matrizes por Opção" class="border p-2 w-full" required>
+    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Salvar</button>
+  </form>
+  <pre id="output" class="mt-4"></pre>
+
+  <script>
+    document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const programa = {
+        codigo: document.getElementById('codigo').value,
+        padrao1: parseInt(document.getElementById('padrao1').value),
+        matrizes_opcao: parseInt(document.getElementById('matrizes_opcao').value),
+        matrizaria: []
+      };
+      const res = await fetch('/api/programa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(programa)
+      });
+      const data = await res.json();
+      document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>

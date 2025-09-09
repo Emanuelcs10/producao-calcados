@@ -1,0 +1,19 @@
+{
+  "name": "producao-calcados-square",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node api/programa.js",
+    "start": "node api/programa.js"
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.28.0",
+    "body-parser": "^1.20.2",
+    "express": "^4.21.2"
+  },
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
