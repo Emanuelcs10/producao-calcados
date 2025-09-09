@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>Cadastro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Cadastro de Programa</h1>
+
+    <input id="codigo" placeholder="Código" class="w-full p-2 border rounded mb-2">
+    <input id="padrao1" placeholder="Padrão1" type="number" class="w-full p-2 border rounded mb-2">
+    <select id="qtd_matrizes" class="w-full p-2 border rounded mb-2">
+      <option value="12">12</option><option value="18">18</option>
+    </select>
+
+    <textarea id="dados_matrizaria" placeholder='Ex: [{"numeracao":34,"matrizes":2,"girosInicial":1500}]' class="w-full p-2 border rounded mb-2" rows="6"></textarea>
+
+    <button id="btnSalvar" class="bg-blue-600 text-white px-4 py-2 rounded">Salvar</button>
+    <p id="msg" class="mt-3 text-sm"></p>
+  </div>
+
+<script>
+document.getElementById('btnSalvar').addEventListener('click', async () => {
+  const codigo = document.getElementById('codigo').value.trim();
+  const padrao1 = parseFloat(document.getElementById('padrao1').value) || 0;
+  const qtd_matrizes = parseInt(document.getElementById('qtd_matrizes').value) || 12;
+  let dados_matrizaria = [];
+  try {
+    dados_matrizaria = JSON.parse(document.getElementById('dados_matrizaria').value || '[]');
+  } catch(e) {
+    document.getElementById('msg').textContent = 'JSON da matrizaria inválido.';
+    return;
+  }
+
+  if (!codigo) { document.getElementById('msg').textContent = 'Código obrigatório.'; return; }
+
+  try {
+    const res = await fetch('/api/programa', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ codigo, padrao1, qtd_matrizes, dados_matrizaria })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('msg').textContent = data.message;
+    } else document.getElementById('msg').textContent = data.error;
+  } catch (err) {
+    document.getElementById('msg').textContent = 'Erro de rede: ' + err.message;
+  }
+});
+</script>
+</body>
+</html>
