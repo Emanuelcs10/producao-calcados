@@ -2,9 +2,7 @@
   "name": "producao-calcados",
   "version": "1.0.0",
   "scripts": {
+    "dev": "vercel dev",
     "start": "vercel dev"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.42.0"
   }
 }
