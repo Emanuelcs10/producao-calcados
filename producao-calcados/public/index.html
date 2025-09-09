@@ -1,17 +1,25 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <title>Produção de Calçados</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <title>Teste Produção de Calçados</title>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-  <div class="text-center">
-    <h1 class="text-3xl font-bold mb-6">Produção de Calçados</h1>
-    <div class="flex gap-4 justify-center">
-      <a href="/cadastro.html" class="bg-blue-600 text-white px-6 py-3 rounded">Cadastro</a>
-      <a href="/controle.html" class="bg-green-600 text-white px-6 py-3 rounded">Controle</a>
-    </div>
-  </div>
+<body>
+  <h1>Frontend funcionando ✅</h1>
+  <button onclick="testApi()">Testar API</button>
+
+  <pre id="output"></pre>
+
+  <script>
+    async function testApi() {
+      try {
+        const res = await fetch('/api/programa');
+        const data = await res.json();
+        document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('output').innerText = 'Erro: ' + err.message;
+      }
+    }
+  </script>
 </body>
 </html>
