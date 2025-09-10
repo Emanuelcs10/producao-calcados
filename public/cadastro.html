@@ -2,54 +2,15 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastro de Programa</title>
-  <script>
-    async function salvarPrograma() {
-      const nome = document.getElementById("nome").value;
-      const descricao = document.getElementById("descricao").value;
-
-      try {
-        const response = await fetch("/api/programa", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nome, descricao })
-        });
-
-        if (!response.ok) throw new Error("Erro ao salvar");
-
-        alert("Programa salvo com sucesso!");
-        document.getElementById("nome").value = "";
-        document.getElementById("descricao").value = "";
-        carregarProgramas();
-      } catch (err) {
-        alert("Erro: " + err.message);
-      }
-    }
-
-    async function carregarProgramas() {
-      try {
-        const response = await fetch("/api/programa");
-        const data = await response.json();
-        const lista = document.getElementById("lista");
-        lista.innerHTML = "";
-        data.forEach(p => {
-          const li = document.createElement("li");
-          li.textContent = `${p.nome} - ${p.descricao}`;
-          lista.appendChild(li);
-        });
-      } catch (err) {
-        console.error("Erro ao carregar programas:", err);
-      }
-    }
-
-    window.onload = carregarProgramas;
-  </script>
+  <title>Cadastro de Programas</title>
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <h1>Cadastro de Programa</h1>
+  <h1>Cadastro de Programas</h1>
+
   <input id="nome" placeholder="Nome do programa"><br><br>
   <input id="descricao" placeholder="Descrição"><br><br>
+  <input id="secao" placeholder="Seção (ex: Setor A)"><br><br>
   <button onclick="salvarPrograma()">Salvar</button>
 
   <h2>Programas cadastrados</h2>
