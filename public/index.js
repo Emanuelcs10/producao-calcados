@@ -2,39 +2,21 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial, sans-serif" }}>
-      <h1 style={{ fontSize: "2em", marginBottom: "20px" }}>Sistema de Produção</h1>
-      <p style={{ marginBottom: "30px" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 font-sans">
+      <h1 className="text-4xl font-bold mb-6">Sistema de Produção</h1>
+      <p className="text-lg mb-10 text-center">
         Escolha uma opção abaixo para gerenciar os programas e acompanhar a produção:
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "15px", maxWidth: "300px" }}>
+      <div className="flex flex-col gap-4 w-64">
         <Link href="/cadastro">
-          <a style={{
-            display: "block",
-            padding: "15px",
-            textAlign: "center",
-            backgroundColor: "#0070f3",
-            color: "white",
-            borderRadius: "8px",
-            textDecoration: "none",
-            fontWeight: "bold"
-          }}>
+          <a className="block text-center bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition">
             Cadastro de Programas
           </a>
         </Link>
 
         <Link href="/controle">
-          <a style={{
-            display: "block",
-            padding: "15px",
-            textAlign: "center",
-            backgroundColor: "#28a745",
-            color: "white",
-            borderRadius: "8px",
-            textDecoration: "none",
-            fontWeight: "bold"
-          }}>
+          <a className="block text-center bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 transition">
             Controle de Produção
           </a>
         </Link>
