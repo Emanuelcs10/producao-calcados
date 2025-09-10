@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Cadastro de Programas</title>
-  <script src="script.js" defer></script>
+    <meta charset="UTF-8">
+    <title>Controle de Produção</title>
 </head>
 <body>
-  <h1>Cadastro de Programas</h1>
+<h2>Cadastro de Produção</h2>
 
-  <input id="nome" placeholder="Nome do programa"><br><br>
-  <input id="descricao" placeholder="Descrição"><br><br>
-  <input id="secao" placeholder="Seção (ex: Setor A)"><br><br>
-  <button onclick="salvarPrograma()">Salvar</button>
+<label>Programa:</label>
+<input type="text" id="programa">
+<label>Numeração:</label>
+<input type="text" id="numeracao">
+<label>Matrizes:</label>
+<input type="number" id="num_matrizes">
+<label>Saldo Inicial:</label>
+<input type="number" id="saldo_inicial">
+<label>Saldo Atual:</label>
+<input type="number" id="saldo_atual">
+<label>Horas Produzidas:</label>
+<input type="number" id="horas_produzidas">
+<label>Tempo Planejado:</label>
+<input type="number" id="tempo_planejado">
 
-  <h2>Programas cadastrados</h2>
-  <ul id="lista"></ul>
+<button onclick="salvarPrograma()">Salvar Programa</button>
+
+<script src="script.js"></script>
 </body>
 </html>
