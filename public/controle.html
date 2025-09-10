@@ -39,6 +39,11 @@
 </table>
 
 <script>
+    // Detecta o ambiente e define a URL base da API
+    const apiBaseUrl = window.location.hostname === "localhost"
+        ? "http://localhost:3000/api" // backend local
+        : "https://producao-calcados-suza.vercel.app/api/programa"; // backend em produção
+
     function atualizarTabela(dados) {
         const tbody = document.querySelector("#tabelaProducao tbody");
         tbody.innerHTML = "";
@@ -71,7 +76,7 @@
         }
 
         try {
-            const response = await fetch(`http://localhost:3000/api/programa/${codigo}`);
+            const response = await fetch(`${apiBaseUrl}/programa/${codigo}`);
             if (!response.ok) throw new Error("Programa não encontrado");
 
             const dados = await response.json();
