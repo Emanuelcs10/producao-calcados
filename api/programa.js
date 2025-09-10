@@ -34,7 +34,8 @@ async function init() {
       CREATE TABLE IF NOT EXISTS programas (
         id SERIAL PRIMARY KEY,
         nome TEXT NOT NULL,
-        descricao TEXT NOT NULL
+        descricao TEXT NOT NULL,
+        secao TEXT NOT NULL
       )
     `);
     console.log("Tabela criada/verificada com sucesso");
@@ -44,10 +45,10 @@ async function init() {
 }
 init();
 
-// Rota GET - listar programas
+// GET - listar programas agrupados por seção
 app.get("/api/programa", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM programas ORDER BY id DESC");
+    const result = await pool.query("SELECT * FROM programas ORDER BY secao, id DESC");
     res.json(result.rows);
   } catch (err) {
     console.error("Erro ao buscar programas:", err);
@@ -55,17 +56,20 @@ app.get("/api/programa", async (req, res) => {
   }
 });
 
-// Rota POST - salvar programa
+// POST - salvar programa com seção
 app.post("/api/programa", async (req, res) => {
   try {
-    const { nome, descricao } = req.body;
-    if (!nome || !descricao) {
-      return res.status(400).json({ error: "Nome e descrição são obrigatórios" });
+    const { nome, descricao, secao } = req.body;
+
+    if (!nome || !descricao || !secao) {
+      return res.status(400).json({ error: "Nome, descrição e seção são obrigatórios" });
     }
+
     const result = await pool.query(
-      "INSERT INTO programas (nome, descricao) VALUES ($1, $2) RETURNING *",
-      [nome, descricao]
+      "INSERT INTO programas (nome, descricao, secao) VALUES ($1, $2, $3) RETURNING *",
+      [nome, descricao, secao]
     );
+
     console.log("Programa salvo:", result.rows[0]);
     res.json(result.rows[0]);
   } catch (err) {
