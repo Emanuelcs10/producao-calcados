@@ -1,93 +1,87 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Controle de Produção</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
-        .positivo { color: green; font-weight: bold; }
-        .atrasado { color: red; font-weight: bold; }
-        #buscarBtn { padding: 6px 12px; cursor: pointer; }
-        #programaInput { padding: 6px; width: 200px; }
-    </style>
-</head>
-<body>
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
-<h2>Controle de Produção</h2>
+// Conexão com Supabase
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_KEY
+);
 
-<label for="programaInput">Programa:</label>
-<input type="text" id="programaInput" placeholder="Digite o código do programa">
-<button id="buscarBtn">Buscar</button>
+// Função para calcular status
+function calcularStatus(programa) {
+  const horaAtual = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/Fortaleza" })
+  );
+  const tempoPlanejado = new Date(programa.tempo_planejado);
 
-<table id="tabelaProducao">
-    <thead>
-        <tr>
-            <th>Numeração</th>
-            <th>Número de Matrizes</th>
-            <th>Saldo Giros Inicial</th>
-            <th>Saldo Giros Atual</th>
-            <th>Horas Produzidas</th>
-            <th>Tempo</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Dados vão aparecer aqui -->
-    </tbody>
-</table>
+  const horasPlanejadas = (horaAtual - tempoPlanejado) / 1000 / 3600; // diferença em horas
+  const diff = programa.horas_produzidas - horasPlanejadas;
 
-<script>
-    // Detecta o ambiente e define a URL base da API
-    const apiBaseUrl = window.location.hostname === "localhost"
-        ? "http://localhost:3000/api" // backend local
-        : "https://producao-calcados-suza.vercel.app/api/programa"; // backend em produção
+  if (diff > 0) return "Atrasado";
+  if (diff < 0) return "Adiantado";
+  return "Dentro do prazo";
+}
 
-    function atualizarTabela(dados) {
-        const tbody = document.querySelector("#tabelaProducao tbody");
-        tbody.innerHTML = "";
+export default function Controle() {
+  const [programas, setProgramas] = useState([]);
 
-        dados.forEach(item => {
-            const tr = document.createElement("tr");
+  useEffect(() => {
+    async function fetchProgramas() {
+      const { data, error } = await supabase
+        .from("programas")
+        .select("*")
+        .order("data_criacao", { ascending: true });
 
-            const tempo = item.horas_produzidas - item.tempo_planejado;
-            const tempoClasse = tempo >= 0 ? "positivo" : "atrasado";
-            const tempoTexto = tempo >= 0 ? `+${tempo.toFixed(2)}` : `${tempo.toFixed(2)}`;
-
-            tr.innerHTML = `
-                <td>${item.numeracao}</td>
-                <td>${item.num_matrizes}</td>
-                <td>${item.saldo_inicial}</td>
-                <td>${item.saldo_atual}</td>
-                <td>${item.horas_produzidas}</td>
-                <td class="${tempoClasse}">${tempoTexto}</td>
-            `;
-
-            tbody.appendChild(tr);
-        });
+      if (error) {
+        console.error("Erro ao buscar programas:", error);
+      } else {
+        setProgramas(data);
+      }
     }
 
-    document.getElementById("buscarBtn").addEventListener("click", async () => {
-        const codigo = document.getElementById("programaInput").value.trim();
-        if (!codigo) {
-            alert("Digite o código do programa!");
-            return;
-        }
+    fetchProgramas();
+    // Atualiza a cada 1 minuto automaticamente
+    const interval = setInterval(fetchProgramas, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
-        try {
-            const response = await fetch(`${apiBaseUrl}/programa/${codigo}`);
-            if (!response.ok) throw new Error("Programa não encontrado");
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Controle de Produção</h1>
+      <table border="1" cellPadding="5" style={{ borderCollapse: "collapse", width: "100%" }}>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Matrizaria</th>
+            <th>Número de Matrizes</th>
+            <th>Saldo de Giros Inicial</th>
+            <th>Horas Produzidas</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {programas.map((p) => {
+            const status = calcularStatus(p);
+            const color =
+              status === "Atrasado"
+                ? "red"
+                : status === "Adiantado"
+                ? "lightgreen"
+                : "yellow";
 
-            const dados = await response.json();
-            if (dados.length === 0) alert("Programa não possui dados de produção.");
-
-            atualizarTabela(dados);
-        } catch (err) {
-            alert("Erro ao buscar o programa: " + err.message);
-        }
-    });
-</script>
-
-</body>
-</html>
+            return (
+              <tr key={p.id} style={{ backgroundColor: color }}>
+                <td>{p.nome}</td>
+                <td>{p.matriz}</td>
+                <td>{p.numero_matrizes}</td>
+                <td>{p.saldo_giros_inicial}</td>
+                <td>{p.horas_produzidas}</td>
+                <td>{status}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
