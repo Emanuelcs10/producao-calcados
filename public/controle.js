@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_KEY
 );
 
-// Calcula horas produzidas e status com base em giros e padrão3
+// Calcula horas produzidas e status com padrão3
 function calcularHorasStatus(programa) {
   if (!programa.numeros || programa.numeros.length === 0) return { horasProduzidas: 0, status: "N/A" };
 
@@ -15,12 +15,11 @@ function calcularHorasStatus(programa) {
     curr.saldo_giros_atual > prev.saldo_giros_atual ? curr : prev
   , programa.numeros[0]);
 
-  const numeroMatrizes = maiorSaldoObj.numero_matrizes; // número de matrizes da numeração
-  const padrao1 = programa.padrao1 || 1; // padrão1 do programa
-  const divisor = (numeroMatrizes === 12 || numeroMatrizes === 18) ? numeroMatrizes : 12; // regra do 12 ou 18
-
   // Cálculo do padrão3
-  const padrao3 = (padrao1 / divisor) * numeroMatrizes;
+  const divisor = (maiorSaldoObj.numero_matrizes === 12 || maiorSaldoObj.numero_matrizes === 18)
+    ? maiorSaldoObj.numero_matrizes
+    : 12; // regra de fallback
+  const padrao3 = (programa.padrao1 / divisor) * maiorSaldoObj.numero_matrizes;
 
   // Diferença de giros
   const diffGiros = maiorSaldoObj.saldo_giros_atual - maiorSaldoObj.saldo_giros_inicial;
@@ -34,7 +33,13 @@ function calcularHorasStatus(programa) {
   else if (horasProduzidas > 0) status = "Atrasado";
   else status = "Dentro do prazo";
 
-  return { horasProduzidas, status, numMaiorSaldo: maiorSaldoObj.numero, saldoInicial: maiorSaldoObj.saldo_giros_inicial, saldoAtual: maiorSaldoObj.saldo_giros_atual };
+  return {
+    horasProduzidas,
+    status,
+    numMaiorSaldo: maiorSaldoObj.numero,
+    saldoInicial: maiorSaldoObj.saldo_giros_inicial,
+    saldoAtual: maiorSaldoObj.saldo_giros_atual
+  };
 }
 
 export default function Controle() {
