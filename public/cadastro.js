@@ -5,14 +5,12 @@ export default function Cadastro() {
     { nome: "", matriz: "", numero_matrizes: "", saldo_giros_inicial: "" }
   ]);
 
-  // Atualiza o valor de uma célula
   const handleChange = (index, e) => {
     const newProgramas = [...programas];
     newProgramas[index][e.target.name] = e.target.value;
     setProgramas(newProgramas);
   };
 
-  // Adiciona uma nova linha vazia
   const addLinha = () => {
     setProgramas([
       ...programas,
@@ -20,17 +18,14 @@ export default function Cadastro() {
     ]);
   };
 
-  // Remove uma linha pelo índice
   const removeLinha = (index) => {
     const newProgramas = programas.filter((_, i) => i !== index);
     setProgramas(newProgramas);
   };
 
-  // Envia todos os programas para o Supabase
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Valida que todas as linhas estão preenchidas
     for (const [i, programa] of programas.entries()) {
       if (!programa.nome || !programa.matriz || !programa.numero_matrizes || !programa.saldo_giros_inicial) {
         alert(`Preencha todos os campos da linha ${i + 1}`);
