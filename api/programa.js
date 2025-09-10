@@ -29,28 +29,30 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: "Erro ao buscar produção" });
         }
 
-    } else if (req.method === "POST") {
-        // Salva um novo registro
-        const { programa, numeracao, num_matrizes, saldo_inicial, saldo_atual, horas_produzidas, tempo_planejado } = req.body;
+    } } else if (req.method === "POST") {
+    const { programa, numeracao, num_matrizes, saldo_inicial, horas_produzidas } = req.body;
 
-        if (!programa || !numeracao) {
-            return res.status(400).json({ error: "Campos obrigatórios faltando" });
-        }
+    if (!programa || !numeracao || !num_matrizes || !saldo_inicial || !horas_produzidas) {
+        return res.status(400).json({ error: "Campos obrigatórios faltando" });
+    }
 
-        try {
-            const query = `
-                INSERT INTO producao 
-                (programa, numeracao, num_matrizes, saldo_inicial, saldo_atual, horas_produzidas, tempo_planejado)
-                VALUES ($1,$2,$3,$4,$5,$6,$7)
-                RETURNING *
-            `;
-            const values = [programa, numeracao, num_matrizes, saldo_inicial, saldo_atual, horas_produzidas, tempo_planejado];
-            const { rows } = await pool.query(query, values);
+    try {
+        const query = `
+            INSERT INTO producao 
+            (programa, numeracao, num_matrizes, saldo_inicial, saldo_atual, horas_produzidas, tempo_planejado)
+            VALUES ($1,$2,$3,$4,$5,$6,$7)
+            RETURNING *
+        `;
+        // saldo_atual = saldo_inicial, tempo_planejado = 0
+        const values = [programa, numeracao, num_matrizes, saldo_inicial, saldo_inicial, horas_produzidas, 0];
+        const { rows } = await pool.query(query, values);
 
-            return res.status(201).json(rows[0]);
-        } catch (err) {
-            console.error("Erro ao salvar programa:", err);
-            return res.status(500).json({ error: "Erro ao salvar programa" });
+        return res.status(201).json(rows[0]);
+    } catch (err) {
+        console.error("Erro ao salvar programa:", err);
+        return res.status(500).json({ error: "Erro ao salvar programa" });
+    }
+}
         }
 
     } else {
