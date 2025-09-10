@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Produção</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    h1 { font-size: 2em; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    tr.adiante { background-color: lightgreen; }
+    tr.atrasado { background-color: #f08080; }
+    tr.normal { background-color: #ffff99; }
+  </style>
+</head>
+<body>
+  <h1>Controle de Produção</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Programa</th>
+        <th>Numeração Maior Saldo</th>
+        <th>Saldo de Giros Inicial</th>
+        <th>Saldo de Giros Atual</th>
+        <th>Horas Produzidas</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaControle">
+      <tr>
+        <td>Programa Exemplo</td>
+        <td>42</td>
+        <td>100</td>
+        <td>120</td>
+        <td>2.5</td>
+        <td class="status">Atrasado</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
