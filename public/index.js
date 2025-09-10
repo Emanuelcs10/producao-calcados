@@ -4,7 +4,9 @@ export default function Home() {
   return (
     <div style={{ padding: "40px", fontFamily: "Arial, sans-serif" }}>
       <h1 style={{ fontSize: "2em", marginBottom: "20px" }}>Sistema de Produção</h1>
-      <p style={{ marginBottom: "30px" }}>Escolha uma opção abaixo para gerenciar os programas e acompanhar a produção:</p>
+      <p style={{ marginBottom: "30px" }}>
+        Escolha uma opção abaixo para gerenciar os programas e acompanhar a produção:
+      </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "15px", maxWidth: "300px" }}>
         <Link href="/cadastro">
@@ -17,7 +19,9 @@ export default function Home() {
             borderRadius: "8px",
             textDecoration: "none",
             fontWeight: "bold"
-          }}>Cadastro de Programas</a>
+          }}>
+            Cadastro de Programas
+          </a>
         </Link>
 
         <Link href="/controle">
@@ -30,7 +34,9 @@ export default function Home() {
             borderRadius: "8px",
             textDecoration: "none",
             fontWeight: "bold"
-          }}>Controle de Produção</a>
+          }}>
+            Controle de Produção
+          </a>
         </Link>
       </div>
     </div>
