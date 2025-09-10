@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// Conexão com Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_KEY
 );
 
-// Função para calcular status
 function calcularStatus(programa) {
   const horaAtual = new Date(
     new Date().toLocaleString("en-US", { timeZone: "America/Fortaleza" })
@@ -32,15 +30,11 @@ export default function Controle() {
         .select("*")
         .order("data_criacao", { ascending: true });
 
-      if (error) {
-        console.error("Erro ao buscar programas:", error);
-      } else {
-        setProgramas(data);
-      }
+      if (error) console.error("Erro ao buscar programas:", error);
+      else setProgramas(data);
     }
 
     fetchProgramas();
-    // Atualiza a cada 1 minuto automaticamente
     const interval = setInterval(fetchProgramas, 60000);
     return () => clearInterval(interval);
   }, []);
