@@ -1,51 +1,131 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Controle de Produção</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
-        .positivo { color: green; font-weight: bold; }
-        .atrasado { color: red; font-weight: bold; }
-        input { margin: 4px; padding: 4px; }
-        button { margin: 4px; padding: 6px 12px; cursor: pointer; }
-    </style>
-</head>
-<body>
+import { useState } from "react";
 
-<h2>Cadastro de Produção</h2>
+export default function Cadastro() {
+  const [programas, setProgramas] = useState([
+    { nome: "", matriz: "", numero_matrizes: "", saldo_giros_inicial: "" }
+  ]);
 
-<label>Programa:</label><input type="text" id="programa">
-<label>Numeração:</label><input type="text" id="numeracao">
-<label>Matrizes:</label><input type="number" id="num_matrizes">
-<label>Saldo Inicial:</label><input type="number" id="saldo_inicial">
-<label>Saldo Atual:</label><input type="number" id="saldo_atual">
-<label>Horas Produzidas:</label><input type="number" id="horas_produzidas">
-<label>Tempo Planejado:</label><input type="number" id="tempo_planejado">
+  // Atualiza o valor de uma célula
+  const handleChange = (index, e) => {
+    const newProgramas = [...programas];
+    newProgramas[index][e.target.name] = e.target.value;
+    setProgramas(newProgramas);
+  };
 
-<button onclick="salvarPrograma()">Salvar Programa</button>
-<button onclick="buscarPrograma()">Buscar Programa</button>
+  // Adiciona uma nova linha vazia
+  const addLinha = () => {
+    setProgramas([
+      ...programas,
+      { nome: "", matriz: "", numero_matrizes: "", saldo_giros_inicial: "" }
+    ]);
+  };
 
-<h3>Dados de Produção</h3>
-<table id="tabelaProducao">
-    <thead>
-        <tr>
-            <th>Numeração</th>
-            <th>Número de Matrizes</th>
-            <th>Saldo Giros Inicial</th>
-            <th>Saldo Giros Atual</th>
-            <th>Horas Produzidas</th>
-            <th>Tempo</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Dados aparecerão aqui -->
-    </tbody>
-</table>
+  // Remove uma linha pelo índice
+  const removeLinha = (index) => {
+    const newProgramas = programas.filter((_, i) => i !== index);
+    setProgramas(newProgramas);
+  };
 
-<script src="script.js"></script>
-</body>
-</html>
+  // Envia todos os programas para o Supabase
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Valida que todas as linhas estão preenchidas
+    for (const [i, programa] of programas.entries()) {
+      if (!programa.nome || !programa.matriz || !programa.numero_matrizes || !programa.saldo_giros_inicial) {
+        alert(`Preencha todos os campos da linha ${i + 1}`);
+        return;
+      }
+    }
+
+    for (const programa of programas) {
+      const res = await fetch("/api/programa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(programa)
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert("Erro ao cadastrar: " + error.error);
+        return;
+      }
+    }
+
+    alert("Todos os programas foram cadastrados com sucesso!");
+    setProgramas([{ nome: "", matriz: "", numero_matrizes: "", saldo_giros_inicial: "" }]);
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Cadastro de Programas</h1>
+      <form onSubmit={handleSubmit}>
+        <table border="1" cellPadding="5" style={{ borderCollapse: "collapse", width: "100%" }}>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Matrizaria</th>
+              <th>Número de Matrizes</th>
+              <th>Saldo de Giros Inicial</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {programas.map((programa, index) => (
+              <tr key={index}>
+                <td>
+                  <input
+                    type="text"
+                    name="nome"
+                    value={programa.nome}
+                    onChange={(e) => handleChange(index, e)}
+                    required
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    name="matriz"
+                    value={programa.matriz}
+                    onChange={(e) => handleChange(index, e)}
+                    required
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    name="numero_matrizes"
+                    value={programa.numero_matrizes}
+                    onChange={(e) => handleChange(index, e)}
+                    required
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    name="saldo_giros_inicial"
+                    value={programa.saldo_giros_inicial}
+                    onChange={(e) => handleChange(index, e)}
+                    required
+                  />
+                </td>
+                <td>
+                  <button type="button" onClick={() => removeLinha(index)}>
+                    Remover
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <button type="button" onClick={addLinha} style={{ marginTop: "10px", marginRight: "10px" }}>
+          Adicionar Linha
+        </button>
+        <button type="submit" style={{ marginTop: "10px" }}>
+          Cadastrar Programas
+        </button>
+      </form>
+    </div>
+  );
+}
