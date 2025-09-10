@@ -3,26 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>Controle de Produção</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .positivo { color: green; font-weight: bold; }
+        .atrasado { color: red; font-weight: bold; }
+        input { margin: 4px; padding: 4px; }
+        button { margin: 4px; padding: 6px 12px; cursor: pointer; }
+    </style>
 </head>
 <body>
+
 <h2>Cadastro de Produção</h2>
 
-<label>Programa:</label>
-<input type="text" id="programa">
-<label>Numeração:</label>
-<input type="text" id="numeracao">
-<label>Matrizes:</label>
-<input type="number" id="num_matrizes">
-<label>Saldo Inicial:</label>
-<input type="number" id="saldo_inicial">
-<label>Saldo Atual:</label>
-<input type="number" id="saldo_atual">
-<label>Horas Produzidas:</label>
-<input type="number" id="horas_produzidas">
-<label>Tempo Planejado:</label>
-<input type="number" id="tempo_planejado">
+<label>Programa:</label><input type="text" id="programa">
+<label>Numeração:</label><input type="text" id="numeracao">
+<label>Matrizes:</label><input type="number" id="num_matrizes">
+<label>Saldo Inicial:</label><input type="number" id="saldo_inicial">
+<label>Saldo Atual:</label><input type="number" id="saldo_atual">
+<label>Horas Produzidas:</label><input type="number" id="horas_produzidas">
+<label>Tempo Planejado:</label><input type="number" id="tempo_planejado">
 
 <button onclick="salvarPrograma()">Salvar Programa</button>
+<button onclick="buscarPrograma()">Buscar Programa</button>
+
+<h3>Dados de Produção</h3>
+<table id="tabelaProducao">
+    <thead>
+        <tr>
+            <th>Numeração</th>
+            <th>Número de Matrizes</th>
+            <th>Saldo Giros Inicial</th>
+            <th>Saldo Giros Atual</th>
+            <th>Horas Produzidas</th>
+            <th>Tempo</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Dados aparecerão aqui -->
+    </tbody>
+</table>
 
 <script src="script.js"></script>
 </body>
