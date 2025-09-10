@@ -9,35 +9,42 @@ const { Pool } = pkg;
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Resolver caminho de arquivos
+// Caminho absoluto
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Conexão PostgreSQL
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "../public")));
+
+// Conexão com PostgreSQL
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || "postgresql://postgres:8efrmc*3Y6MbB&.@db.fvauluyjupdjtqlexsrb.supabase.co:5432/postgres",
+  connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
-app.use(cors());
-app.use(bodyParser.json());
-
-// Criar tabela se não existir
+// Testa conexão e cria tabela
 async function init() {
-  await pool.query(`CREATE TABLE IF NOT EXISTS programas (
-    id SERIAL PRIMARY KEY,
-    nome TEXT NOT NULL,
-    descricao TEXT NOT NULL
-  )`);
+  try {
+    console.log("Testando conexão com o banco...");
+    await pool.query("SELECT 1");
+    console.log("Conexão OK");
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS programas (
+        id SERIAL PRIMARY KEY,
+        nome TEXT NOT NULL,
+        descricao TEXT NOT NULL
+      )
+    `);
+    console.log("Tabela criada/verificada com sucesso");
+  } catch (err) {
+    console.error("Erro inicializando o banco:", err);
+  }
 }
 init();
 
-// Rota principal → carrega frontend
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/cadastro.html"));
-});
-
-// Rota GET - lista programas
+// Rota GET - listar programas
 app.get("/api/programa", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM programas ORDER BY id DESC");
@@ -48,7 +55,7 @@ app.get("/api/programa", async (req, res) => {
   }
 });
 
-// Rota POST - adiciona programa
+// Rota POST - salvar programa
 app.post("/api/programa", async (req, res) => {
   try {
     const { nome, descricao } = req.body;
@@ -59,6 +66,7 @@ app.post("/api/programa", async (req, res) => {
       "INSERT INTO programas (nome, descricao) VALUES ($1, $2) RETURNING *",
       [nome, descricao]
     );
+    console.log("Programa salvo:", result.rows[0]);
     res.json(result.rows[0]);
   } catch (err) {
     console.error("Erro ao salvar programa:", err);
@@ -66,7 +74,11 @@ app.post("/api/programa", async (req, res) => {
   }
 });
 
-// Inicia servidor
+// Rota raiz - carrega frontend
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/cadastro.html"));
+});
+
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });
