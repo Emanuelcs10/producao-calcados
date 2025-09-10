@@ -1,43 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle de Produção</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-    h1 { font-size: 2em; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    tr.adiante { background-color: lightgreen; }
-    tr.atrasado { background-color: #f08080; }
-    tr.normal { background-color: #ffff99; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Produção</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+  h1 { font-size: 2em; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  tr.adiante { background-color: lightgreen; }
+  tr.atrasado { background-color: #f08080; }
+  tr.normal { background-color: #ffff99; }
+</style>
 </head>
 <body>
-  <h1>Controle de Produção</h1>
+<h1>Controle de Produção</h1>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Programa</th>
-        <th>Numeração Maior Saldo</th>
-        <th>Saldo de Giros Inicial</th>
-        <th>Saldo de Giros Atual</th>
-        <th>Horas Produzidas</th>
-        <th>Status</th>
+<table>
+  <thead>
+    <tr>
+      <th>Programa</th>
+      <th>Numeração Maior Saldo</th>
+      <th>Saldo de Giros Inicial</th>
+      <th>Saldo de Giros Atual</th>
+      <th>Horas Produzidas</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody id="tabelaControle"></tbody>
+</table>
+
+<script>
+async function carregarProgramas() {
+  const res = await fetch('/api/programas');
+  const programas = await res.json();
+  const tbody = document.getElementById('tabelaControle');
+  tbody.innerHTML = '';
+
+  programas.forEach(p => {
+    if(!p.numeros || p.numeros.length === 0) return;
+
+    // Escolhe a numeração com maior saldo
+    const maior = p.numeros.reduce((prev, curr) => curr.saldo_giros_atual > prev.saldo_giros_atual ? curr : prev, p.numeros[0]);
+
+    // Calcula padrão3
+    const divisor = (maior.numero_matrizes === 12 || maior.numero_matrizes === 18) ? maior.numero_matrizes : 12;
+    const padrao3 = (p.padrao1 / divisor) * maior.numero_matrizes;
+
+    // Calcula horas produzidas
+    const diff = maior.saldo_giros_atual - maior.saldo_giros_inicial;
+    const horas = diff / padrao3;
+
+    // Define status
+    let status = 'Dentro do prazo';
+    let classe = 'normal';
+    if(horas < 0) { status = 'Adiantado'; classe='adiante'; }
+    else if(horas > 0) { status = 'Atrasado'; classe='atrasado'; }
+
+    tbody.innerHTML += `
+      <tr class="${classe}">
+        <td>${p.nome}</td>
+        <td>${maior.numero}</td>
+        <td>${maior.saldo_giros_inicial}</td>
+        <td>${maior.saldo_giros_atual}</td>
+        <td>${horas.toFixed(2)}</td>
+        <td>${status}</td>
       </tr>
-    </thead>
-    <tbody id="tabelaControle">
-      <tr>
-        <td>Programa Exemplo</td>
-        <td>42</td>
-        <td>100</td>
-        <td>120</td>
-        <td>2.5</td>
-        <td class="status">Atrasado</td>
-      </tr>
-    </tbody>
-  </table>
+    `;
+  });
+}
+
+carregarProgramas();
+</script>
 </body>
 </html>
