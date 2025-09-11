@@ -23,7 +23,7 @@
   <div id="programas-container">
     <div class="programa">
       <label>Nome do Programa: <input type="text" name="nome" required></label>
-      <label>Padrão1: <input type="number" name="padrao1" required></label>
+      <label>Padrão1: <input type="number" name="padrao1" required min="1"></label>
 
       <table>
         <thead>
@@ -36,9 +36,9 @@
         </thead>
         <tbody>
           <tr>
-            <td><input type="number" name="numero" required></td>
-            <td><input type="number" name="numero_matrizes" required></td>
-            <td><input type="number" name="saldo_giros_inicial" required></td>
+            <td><input type="number" name="numero" required min="0"></td>
+            <td><input type="number" name="numero_matrizes" required min="1"></td>
+            <td><input type="number" name="saldo_giros_inicial" required min="0"></td>
             <td><button type="button" class="btn-remove" onclick="removerLinha(this)">Remover</button></td>
           </tr>
         </tbody>
@@ -74,6 +74,19 @@ function adicionarPrograma() {
   container.appendChild(novo);
 }
 
+// Função de validação simples
+function validarPrograma(nome, padrao1, numeros) {
+  if(!nome || nome.trim() === '') return "Nome do programa é obrigatório.";
+  if(!padrao1 || padrao1 <= 0) return "Padrão1 deve ser maior que zero.";
+  if(!numeros || numeros.length === 0) return "Adicione pelo menos uma numeração.";
+  for(const n of numeros) {
+    if(n.numero < 0) return "Numeração deve ser >= 0";
+    if(n.numero_matrizes <= 0) return "Número de matrizes deve ser > 0";
+    if(n.saldo_giros_inicial < 0) return "Saldo de giros inicial deve ser >= 0";
+  }
+  return null;
+}
+
 document.getElementById('formProgramas').addEventListener('submit', async function(e) {
   e.preventDefault();
 
@@ -93,6 +106,15 @@ document.getElementById('formProgramas').addEventListener('submit', async functi
       numeros.push({ numero, numero_matrizes, saldo_giros_inicial });
     });
 
+    const erro = validarPrograma(nome, padrao1, numeros);
+    if(erro) {
+      alert("Erro no programa '" + nome + "': " + erro);
+      return;
+    }
+
+    // Debug: mostrar JSON antes de enviar
+    console.log("Enviando para API:", JSON.stringify({ nome, padrao1, numeros }, null, 2));
+
     // Envia para a API
     try {
       const res = await fetch('/api/programa', {
@@ -102,16 +124,17 @@ document.getElementById('formProgramas').addEventListener('submit', async functi
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro ao cadastrar programa');
+      if(!res.ok) throw new Error(data.error || 'Erro desconhecido na API');
 
     } catch (err) {
-      alert('Erro: ' + err.message);
+      alert('Erro ao cadastrar programa: ' + err.message);
+      console.error(err);
       return;
     }
   }
 
   alert('Todos os programas cadastrados com sucesso!');
-  // Limpa o formulário
+  // Limpa formulário
   programasContainer.innerHTML = '';
   adicionarPrograma();
 });
