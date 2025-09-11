@@ -38,34 +38,31 @@
 <script>
 let programas = [];
 
-async function carregarProgramas() {
+async function carregarProgramas(){
   const res = await fetch('/api/programas');
   programas = await res.json();
   renderizarTabela(programas);
 }
 
-function renderizarTabela(lista) {
+function renderizarTabela(lista){
   const tbody = document.getElementById('tabelaControle');
-  tbody.innerHTML = '';
+  tbody.innerHTML='';
 
-  lista.forEach(p => {
-    if(!p.numeros || p.numeros.length === 0) return;
+  lista.forEach(p=>{
+    if(!p.numeros || p.numeros.length===0) return;
 
-    const maior = p.numeros.reduce((prev, curr) =>
-      curr.saldo_giros_atual > prev.saldo_giros_atual ? curr : prev, p.numeros[0]
-    );
-
-    const divisor = (maior.numero_matrizes === 12 || maior.numero_matrizes === 18) ? maior.numero_matrizes : 12;
-    const padrao3 = (p.padrao1 / divisor) * maior.numero_matrizes;
+    const maior = p.numeros.reduce((prev,curr)=>curr.saldo_giros_atual>prev.saldo_giros_atual?curr:prev,p.numeros[0]);
+    const divisor = (maior.numero_matrizes===12||maior.numero_matrizes===18)?maior.numero_matrizes:12;
+    const padrao3 = (p.padrao1/divisor)*maior.numero_matrizes;
 
     const diff = maior.saldo_giros_atual - maior.saldo_giros_inicial;
-    const horas = diff / padrao3;
+    const horas = diff/padrao3;
 
-    let status = 'Dentro do prazo', classe='normal';
-    if(horas < 0){ status='Adiantado'; classe='adiante'; }
-    else if(horas > 0){ status='Atrasado'; classe='atrasado'; }
+    let status='Dentro do prazo', classe='normal';
+    if(horas<0){ status='Adiantado'; classe='adiante'; }
+    else if(horas>0){ status='Atrasado'; classe='atrasado'; }
 
-    tbody.innerHTML += `
+    tbody.innerHTML+=`
       <tr class="${classe}">
         <td>${p.nome}</td>
         <td>${maior.numero}</td>
@@ -78,10 +75,9 @@ function renderizarTabela(lista) {
   });
 }
 
-// Filtrar tabela enquanto digita
-document.getElementById('busca').addEventListener('input', function() {
+document.getElementById('busca').addEventListener('input', function(){
   const termo = this.value.toLowerCase();
-  const filtrados = programas.filter(p => p.nome.toLowerCase().includes(termo));
+  const filtrados = programas.filter(p=>p.nome.toLowerCase().includes(termo));
   renderizarTabela(filtrados);
 });
 
