@@ -7,6 +7,7 @@
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
   h1 { font-size: 2em; margin-bottom: 20px; }
+  input[type="text"] { padding: 8px; width: 300px; margin-bottom: 20px; }
   table { width: 100%; border-collapse: collapse; }
   th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
   tr.adiante { background-color: lightgreen; }
@@ -15,7 +16,10 @@
 </style>
 </head>
 <body>
+
 <h1>Controle de Produção</h1>
+
+<input type="text" id="busca" placeholder="Digite o nome do programa...">
 
 <table>
   <thead>
@@ -32,31 +36,34 @@
 </table>
 
 <script>
+let programas = [];
+
 async function carregarProgramas() {
   const res = await fetch('/api/programas');
-  const programas = await res.json();
+  programas = await res.json();
+  renderizarTabela(programas);
+}
+
+function renderizarTabela(lista) {
   const tbody = document.getElementById('tabelaControle');
   tbody.innerHTML = '';
 
-  programas.forEach(p => {
+  lista.forEach(p => {
     if(!p.numeros || p.numeros.length === 0) return;
 
-    // Escolhe a numeração com maior saldo
-    const maior = p.numeros.reduce((prev, curr) => curr.saldo_giros_atual > prev.saldo_giros_atual ? curr : prev, p.numeros[0]);
+    const maior = p.numeros.reduce((prev, curr) =>
+      curr.saldo_giros_atual > prev.saldo_giros_atual ? curr : prev, p.numeros[0]
+    );
 
-    // Calcula padrão3
     const divisor = (maior.numero_matrizes === 12 || maior.numero_matrizes === 18) ? maior.numero_matrizes : 12;
     const padrao3 = (p.padrao1 / divisor) * maior.numero_matrizes;
 
-    // Calcula horas produzidas
     const diff = maior.saldo_giros_atual - maior.saldo_giros_inicial;
     const horas = diff / padrao3;
 
-    // Define status
-    let status = 'Dentro do prazo';
-    let classe = 'normal';
-    if(horas < 0) { status = 'Adiantado'; classe='adiante'; }
-    else if(horas > 0) { status = 'Atrasado'; classe='atrasado'; }
+    let status = 'Dentro do prazo', classe='normal';
+    if(horas < 0){ status='Adiantado'; classe='adiante'; }
+    else if(horas > 0){ status='Atrasado'; classe='atrasado'; }
 
     tbody.innerHTML += `
       <tr class="${classe}">
@@ -70,6 +77,13 @@ async function carregarProgramas() {
     `;
   });
 }
+
+// Filtrar tabela enquanto digita
+document.getElementById('busca').addEventListener('input', function() {
+  const termo = this.value.toLowerCase();
+  const filtrados = programas.filter(p => p.nome.toLowerCase().includes(termo));
+  renderizarTabela(filtrados);
+});
 
 carregarProgramas();
 </script>
