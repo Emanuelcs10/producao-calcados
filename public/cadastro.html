@@ -75,13 +75,13 @@ function adicionarPrograma() {
 }
 
 function validarPrograma(nome, padrao1, numeros) {
-  if(!nome || nome.trim()==='') return "Nome do programa é obrigatório";
-  if(!padrao1 || padrao1<=0) return "Padrão1 inválido";
-  if(!numeros || numeros.length===0) return "Adicione pelo menos uma numeração";
-  for(const n of numeros){
-    if(n.numero<0) return "Numeração deve ser >=0";
-    if(n.numero_matrizes<=0) return "Número de matrizes deve ser >0";
-    if(n.saldo_giros_inicial<0) return "Saldo de giros inicial deve ser >=0";
+  if(!nome || nome.trim() === '') return "Nome do programa é obrigatório";
+  if(!padrao1 || padrao1 <= 0) return "Padrão1 inválido";
+  if(!numeros || numeros.length === 0) return "Adicione pelo menos uma numeração";
+  for(const n of numeros) {
+    if(n.numero < 0) return "Numeração deve ser >=0";
+    if(n.numero_matrizes <= 0) return "Número de matrizes deve ser >0";
+    if(n.saldo_giros_inicial < 0) return "Saldo de giros inicial deve ser >=0";
   }
   return null;
 }
@@ -98,7 +98,7 @@ document.getElementById('formProgramas').addEventListener('submit', async functi
 
     const numeros = [];
     const rows = progDiv.querySelectorAll('tbody tr');
-    rows.forEach(row=>{
+    rows.forEach(row => {
       const numero = parseInt(row.querySelector('input[name="numero"]').value);
       const numero_matrizes = parseInt(row.querySelector('input[name="numero_matrizes"]').value);
       const saldo_giros_inicial = parseFloat(row.querySelector('input[name="saldo_giros_inicial"]').value);
@@ -106,30 +106,34 @@ document.getElementById('formProgramas').addEventListener('submit', async functi
     });
 
     const erro = validarPrograma(nome, padrao1, numeros);
-    if(erro){ alert("Erro no programa '"+nome+"': "+erro); return; }
+    if(erro) { alert("Erro no programa '" + nome + "': " + erro); return; }
 
-    console.log("Enviando para API:", JSON.stringify({ nome, padrao1, numeros }, null,2));
+    console.log("Enviando para API:", JSON.stringify({ nome, padrao1, numeros }, null, 2));
 
     try{
-      const res = await fetch('/api/programa',{
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
+      const res = await fetch('/api/programa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nome, padrao1, numeros })
       });
 
+      const text = await res.text(); // lê apenas uma vez
       let data;
-      try { data = await res.json(); }
-      catch(err){ 
-        const text = await res.text();
+      try {
+        data = JSON.parse(text); // tenta parsear JSON
+      } catch(err){
         console.error("Resposta inválida da API:", text);
-        alert("Erro na API: "+text);
+        alert("Erro na API: " + text);
         return;
       }
 
-      if(!res.ok) throw new Error(data.error||'Erro desconhecido');
+      if(!res.ok){
+        alert("Erro ao cadastrar: " + (data.error || "Erro desconhecido"));
+        return;
+      }
 
-    }catch(err){
-      alert("Erro ao cadastrar programa: "+err.message);
+    } catch(err){
+      alert("Erro ao cadastrar programa: " + err.message);
       console.error(err);
       return;
     }
