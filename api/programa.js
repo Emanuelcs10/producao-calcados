@@ -1,61 +1,69 @@
-// api/programa.js
-import { Pool } from "pg";
+import { createClient } from "@supabase/supabase-js";
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
-});
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_KEY
+);
 
-// Função principal para lidar com GET e POST
 export default async function handler(req, res) {
-    if (req.method === "GET") {
-        // Busca os dados de produção
-        const codigo = req.query.codigo;
-        if (!codigo) return res.status(400).json({ error: "Código do programa é obrigatório" });
-
-        try {
-            const query = `
-                SELECT numeracao, num_matrizes, saldo_inicial, saldo_atual, horas_produzidas, tempo_planejado
-                FROM producao
-                WHERE programa = $1
-                ORDER BY numeracao
-            `;
-            const { rows } = await pool.query(query, [codigo]);
-            return res.status(200).json(rows);
-        } catch (err) {
-            console.error("Erro ao buscar produção:", err);
-            return res.status(500).json({ error: "Erro ao buscar produção" });
-        }
-
-    } } else if (req.method === "POST") {
-    const { programa, numeracao, num_matrizes, saldo_inicial, horas_produzidas } = req.body;
-
-    if (!programa || !numeracao || !num_matrizes || !saldo_inicial || !horas_produzidas) {
-        return res.status(400).json({ error: "Campos obrigatórios faltando" });
-    }
-
+  if (req.method === "POST") {
     try {
-        const query = `
-            INSERT INTO producao 
-            (programa, numeracao, num_matrizes, saldo_inicial, saldo_atual, horas_produzidas, tempo_planejado)
-            VALUES ($1,$2,$3,$4,$5,$6,$7)
-            RETURNING *
-        `;
-        // saldo_atual = saldo_inicial, tempo_planejado = 0
-        const values = [programa, numeracao, num_matrizes, saldo_inicial, saldo_inicial, horas_produzidas, 0];
-        const { rows } = await pool.query(query, values);
+      const { nome, padrao1, numeros } = req.body;
 
-        return res.status(201).json(rows[0]);
+      // Salva programa
+      const { data: progData, error: progError } = await supabase
+        .from("programas")
+        .insert({ nome, padrao1 })
+        .select()
+        .single();
+
+      if (progError) throw progError;
+
+      const numerosData = numeros.map(n => ({
+        programa_id: progData.id,
+        numero: n.numero,
+        numero_matrizes: n.numero_matrizes,
+        saldo_giros_inicial: n.saldo_giros_inicial,
+        saldo_giros_atual: n.saldo_giros_inicial // inicia com mesmo valor
+      }));
+
+      // Salva as numerações
+      const { error: numsError } = await supabase
+        .from("numeros")
+        .insert(numerosData);
+
+      if (numsError) throw numsError;
+
+      res.status(200).json({ message: "Programa cadastrado com sucesso!" });
     } catch (err) {
-        console.error("Erro ao salvar programa:", err);
-        return res.status(500).json({ error: "Erro ao salvar programa" });
+      res.status(500).json({ error: err.message });
     }
+  } else {
+    res.status(405).json({ error: "Método não permitido" });
+  }
 }
-        }
 
-    } else {
-        return res.status(405).json({ error: "Método não permitido" });
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_KEY
+);
+
+export default async function handler(req, res) {
+  if (req.method === "GET") {
+    try {
+      const { data, error } = await supabase
+        .from("programas")
+        .select("id, nome, padrao1, numeros(*)")
+        .order("id", { ascending: true });
+
+      if (error) throw error;
+      res.status(200).json(data);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
+  } else {
+    res.status(405).json({ error: "Método não permitido" });
+  }
 }
